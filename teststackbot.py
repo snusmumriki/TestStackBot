@@ -30,14 +30,15 @@ def start(message):
         unit = Unit()
         while True:
             yield 'Set the question text:'
-            unit.text = (yield)
+            unit.text = yield
             yield 'Set the question type:'
-            unit.type = (yield)
+            unit.type = yield
             yield 'Set the question answer:'
-            unit.answer = (yield)
+            unit.answer = yield
             test.units.append(unit)
 
     gen = test_gen()
+    gen.next()
     bot.send_message(message.chat.id, gen.send(message.text))
 
 
