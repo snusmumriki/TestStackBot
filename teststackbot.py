@@ -14,6 +14,9 @@ app.config[
     'REDIS_URL'] = 'redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com:7559'
 redis = FlaskRedis(app)
 
+test = None
+b = False
+
 
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
@@ -24,22 +27,22 @@ def start(message):
 
 @bot.message_handler(commands=['new'])
 def start(message):
-    def test_gen():
-        token = token_bytes(16)
-        test = Test(token, [])
-        unit = Unit()
-        while True:
-            yield 'Set the question text:'
-            unit.text = yield
-            yield 'Set the question type:'
-            unit.type = yield
-            yield 'Set the question answer:'
-            unit.answer = yield
-            test.units.append(unit)
+    b = True
+    token = token_bytes(16)
+    test = Test(token, [])
+    unit = Unit()
+    while b:
+        bot.send_message(message.chat.id, 'Set the question text:')
+        unit.text = yield
+        bot.send_message(message.chat.id, 'Set the question type:')
+        unit.type = yield
+        bot.send_message(message.chat.id, 'Set the question answer:')
+        test.units.append(unit)
 
-    gen = test_gen()
-    gen.next()
-    bot.send_message(message.chat.id, gen.send(message.text))
+
+@bot.message_handler(commands=['create'])
+def start(message):
+    b = False
 
 
 @bot.message_handler(commands=['test'])
