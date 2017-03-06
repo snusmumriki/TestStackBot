@@ -13,8 +13,9 @@ redis = FlaskRedis(app)
 
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
-    #bot.reply_to(message, 'Hello, ' + message.from_user.first_name)
-    bot.send_message(message.chat.id, 'Hello, ' + message.from_user.first_name)
+    text = '''/new - create new test\n
+    /test - start test'''
+    bot.send_message(message.chat.id, text)
 
 
 @bot.message_handler(commands=['new'])
