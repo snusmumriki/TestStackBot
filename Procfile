@@ -1,1 +1,1 @@
-web: gunicorn dvinnerbot:app
+web: gunicorn teststackbot:app
