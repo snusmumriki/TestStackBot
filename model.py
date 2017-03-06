@@ -1,13 +1,9 @@
 class Unit:
-    def __init__(self, text, answer):
-        self.text = text
-        self.answer = answer
+    text = None
+    answer = None
 
 
 class Test:
-    def __init__(self, token, master, units):
+    def __init__(self, token, units):
         self.token = token
-        self.master = master
         self.units = units
-
-

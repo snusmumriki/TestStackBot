@@ -1,7 +1,11 @@
+from secrets import token_bytes
+
 import telebot
 import os
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
+
+from model import Test, Unit
 
 bot = telebot.TeleBot('306447523:AAG4NEunw0OezXDbDjtTZMEFmRnLwYO5Yn8')
 
@@ -20,7 +24,21 @@ def start(message):
 
 @bot.message_handler(commands=['new'])
 def start(message):
-    bot.reply_to(message, 'Hello, ' + message.from_user.first_name)
+    def test_gen():
+        token = token_bytes(16)
+        test = Test(token, [])
+        unit = Unit()
+        while True:
+            yield 'Set the question text:'
+            unit.text = (yield)
+            yield 'Set the question type:'
+            unit.type = (yield)
+            yield 'Set the question answer:'
+            unit.answer = (yield)
+            test.units.append(unit)
+
+    gen = test_gen()
+    bot.send_message(message.chat.id, gen.send(message.text))
 
 
 @bot.message_handler(commands=['test'])
