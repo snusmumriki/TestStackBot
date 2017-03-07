@@ -26,26 +26,30 @@ def start(message):
 
 @bot.message_handler(commands=['new'])
 def new_test(message):
-    token = token_urlsafe(8)
-    redis.set(token, Test(token))
+    try:
+        token = token_urlsafe(8)
+        redis.set(token, Test(token))
 
-    msg = bot.send_message(message.chat.id, 'Set the questions count:')
-    temp['token'] = token
-    bot.register_next_step_handler(msg, set_units_num)
+        msg = bot.send_message(message.chat.id, 'Set the questions count:')
+        temp['token'] = token
+        temp['num'] = int(message.text)
+        bot.register_next_step_handler(msg, set_unit_text)
+    except Exception as e:
+        bot.reply_to(message, str(e) + '1')
 
 
-def set_units_num(message):
+'''def set_units_num(message):
     try:
         msg = bot.send_message(message.chat.id, 'Set the question text:')
-        temp['num'] = int(message.text)
         bot.register_next_step_handler(msg, set_unit_text)
 
     except Exception as e:
-        bot.reply_to(message, str(e))
+        bot.reply_to(message, str(e) + '2')'''
 
 
 def set_unit_text(message):
     try:
+        msg = bot.send_message(message.chat.id, 'Set the question text:')
         token = temp['token']
         test = redis.get(token)
         unit = Unit()
@@ -53,11 +57,11 @@ def set_unit_text(message):
         test.units = [unit]
         redis.set(token, test)
 
-        msg = bot.send_message(message.chat.id, 'Set the question answer:')
+       # msg = bot.send_message(message.chat.id, 'Set the question answer:')
         bot.register_next_step_handler(msg, set_units_answer)
 
     except Exception as e:
-        bot.reply_to(message, str(e))
+        bot.reply_to(message, str(e) + '3')
 
 
 def set_units_answer(message):
