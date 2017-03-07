@@ -35,7 +35,7 @@ def new_test(message):
         msg = bot.send_message(message.chat.id, 'Set the questions count:')
         bot.register_next_step_handler(msg, set_units_num)
     except Exception as e:
-        bot.reply_to(message, str(e))
+        bot.reply_to(message, str(e) + '0')
 
 
 def set_units_num(message):
@@ -44,7 +44,7 @@ def set_units_num(message):
         msg = bot.send_message(message.chat.id, 'Set the question text:')
         bot.register_next_step_handler(msg, set_unit_text)
     except Exception as e:
-        bot.reply_to(message, str(e))
+        bot.reply_to(message, str(e) + '1')
 
 
 def set_unit_text(message):
@@ -55,7 +55,7 @@ def set_unit_text(message):
         msg = bot.send_message(message.chat.id, 'Set the question answer:')
         bot.register_next_step_handler(msg, set_units_answer)
     except Exception as e:
-        bot.reply_to(message, str(e))
+        bot.reply_to(message, str(e) + '2')
 
 
 def set_units_answer(message):
@@ -72,9 +72,10 @@ def set_units_answer(message):
         else:
             del temp['key']
             redis.set(draft.token, pickle.dump(test))
+            bot.send_message(message.chat.id, 'Test successfully created!')
 
     except Exception as e:
-        bot.reply_to(message, str(e))
+        bot.reply_to(message, str(e) + '3')
 
 
 @bot.message_handler(commands=['test'])
