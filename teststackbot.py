@@ -3,6 +3,7 @@ from secrets import token_urlsafe
 import telebot
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
+
 from telebot.types import Update
 
 from model import Test, Unit
@@ -34,38 +35,50 @@ def new_test(message):
 
 
 def set_units_num(message):
-    msg = bot.send_message(message.chat.id, 'Set the question text:')
-    temp['num'] = int(message.text)
-    bot.register_next_step_handler(msg, set_unit_text)
+    try:
+        msg = bot.send_message(message.chat.id, 'Set the question text:')
+        temp['num'] = int(message.text)
+        bot.register_next_step_handler(msg, set_unit_text)
+
+    except Exception as e:
+        bot.reply_to(message, 'oooops')
 
 
 def set_unit_text(message):
-    token = temp['token']
-    test = redis.get(token)
-    unit = Unit()
-    unit.text = message.text
-    test.units.append(unit)
-    redis.set(token, test)
+    try:
+        token = temp['token']
+        test = redis.get(token)
+        unit = Unit()
+        unit.text = message.text
+        test.units.append(unit)
+        redis.set(token, test)
 
-    msg = bot.send_message(message.chat.id, 'Set the question answer:')
-    bot.register_next_step_handler(msg, set_units_answer)
+        msg = bot.send_message(message.chat.id, 'Set the question answer:')
+        bot.register_next_step_handler(msg, set_units_answer)
+
+    except Exception as e:
+        bot.reply_to(message, 'oooops')
 
 
 def set_units_answer(message):
-    token = temp['token']
-    num = temp['num']
+    try:
+        token = temp['token']
+        num = temp['num']
 
-    test = redis.get(token)
-    test.units[-1].answer = message.text
-    redis.set(token, test)
+        test = redis.get(token)
+        test.units[-1].answer = message.text
+        redis.set(token, test)
 
-    if num > 1:
-        msg = bot.send_message(message.chat.id, 'Set the question text:')
-        msg.num = message.num - 1
-        bot.register_next_step_handler(msg, set_unit_text)
-    else:
-        del temp['num']
-        del temp['token']
+        if num > 1:
+            msg = bot.send_message(message.chat.id, 'Set the question text:')
+            temp['num'] = num - 1
+            bot.register_next_step_handler(msg, set_unit_text)
+        else:
+            del temp['num']
+            del temp['token']
+
+    except Exception as e:
+        bot.reply_to(message, 'oooops')
 
 
 @bot.message_handler(commands=['test'])
