@@ -27,7 +27,7 @@ def start(message):
 @bot.message_handler(commands=['new'])
 def new_test(message):
     token = token_urlsafe(8)
-    redis.set(token, Test(token, []))
+    redis.set(token, Test(token))
 
     msg = bot.send_message(message.chat.id, 'Set the questions count:')
     temp['token'] = token
@@ -50,7 +50,7 @@ def set_unit_text(message):
         test = redis.get(token)
         unit = Unit()
         unit.text = message.text
-        test.units.append(unit)
+        test.units = [unit]
         redis.set(token, test)
 
         msg = bot.send_message(message.chat.id, 'Set the question answer:')

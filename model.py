@@ -4,6 +4,6 @@ class Unit:
 
 
 class Test:
-    def __init__(self, token, units):
+    def __init__(self, token):
         self.token = token
-        self.units = units
+        self.units = None
