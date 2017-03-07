@@ -29,13 +29,13 @@ def new_test(message):
     redis.set(token, Test(token, []))
 
     msg = bot.send_message(message.chat.id, 'Set the questions count:')
-    temp['token' + message.from_user.username] = token
+    temp['token' + message.from_user.first_name] = token
     bot.register_next_step_handler(msg, set_units_num)
 
 
 def set_units_num(message):
     msg = bot.send_message(message.chat.id, 'Set the question text:')
-    temp['num' + message.from_user.username] = int(message.text)
+    temp['num' + message.from_user.first_name] = int(message.text)
     bot.register_next_step_handler(msg, set_unit_text)
 
 
@@ -52,8 +52,8 @@ def set_unit_text(message):
 
 
 def set_units_answer(message):
-    token = temp['token' + message.from_user.username]
-    num = temp['num' + message.from_user.username]
+    token = temp['token' + message.from_user.first_name]
+    num = temp['num' + message.from_user.first_name]
 
     test = redis.get(token)
     test.units[-1].answer = message.text
@@ -64,8 +64,8 @@ def set_units_answer(message):
         msg.num = message.num - 1
         bot.register_next_step_handler(msg, set_unit_text)
     else:
-        del temp['num' + message.from_user.username]
-        del temp['token' + message.from_user.username]
+        del temp['num' + message.from_user.first_name]
+        del temp['token' + message.from_user.first_name]
 
 
 @bot.message_handler(commands=['test'])
