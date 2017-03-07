@@ -29,18 +29,18 @@ def new_test(message):
     redis.set(token, Test(token, []))
 
     msg = bot.send_message(message.chat.id, 'Set the questions count:')
-    temp['token' + message.from_user.first_name] = token
+    temp['token'] = token
     bot.register_next_step_handler(msg, set_units_num)
 
 
 def set_units_num(message):
     msg = bot.send_message(message.chat.id, 'Set the question text:')
-    temp['num' + message.from_user.first_name] = int(message.text)
+    temp['num'] = int(message.text)
     bot.register_next_step_handler(msg, set_unit_text)
 
 
 def set_unit_text(message):
-    token = temp['token' + message.from_user.username]
+    token = temp['token']
     test = redis.get(token)
     unit = Unit()
     unit.text = message.text
@@ -52,8 +52,8 @@ def set_unit_text(message):
 
 
 def set_units_answer(message):
-    token = temp['token' + message.from_user.first_name]
-    num = temp['num' + message.from_user.first_name]
+    token = temp['token']
+    num = temp['num']
 
     test = redis.get(token)
     test.units[-1].answer = message.text
@@ -64,13 +64,13 @@ def set_units_answer(message):
         msg.num = message.num - 1
         bot.register_next_step_handler(msg, set_unit_text)
     else:
-        del temp['num' + message.from_user.first_name]
-        del temp['token' + message.from_user.first_name]
+        del temp['num']
+        del temp['token']
 
 
 @bot.message_handler(commands=['test'])
 def start(message):
-    bot.reply_to(message, 'Hello, ' + message.from_user.first_name)
+    bot.reply_to(message, 'Hello, ')
 
 
 @app.route("/update", methods=['POST'])
@@ -83,8 +83,7 @@ def get_message():
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url="https://teststackbot.herokuapp.com/update")
-    redis.set('foo', 'bar')
-    return redis.get('foo'), 200
+    return '!', 200
 
 
 if __name__ == '__main__':
