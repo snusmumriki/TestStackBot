@@ -36,7 +36,6 @@ def new_test(message):
 
 def set_units_num(message):
     try:
-        temp['num'] = int(message.text)
         msg = bot.send_message(message.chat.id, 'Set the question text:')
         bot.register_next_step_handler(msg, set_unit_text)
     except Exception as e:
