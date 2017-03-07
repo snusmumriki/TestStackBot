@@ -7,7 +7,7 @@ from flask.ext.redis import FlaskRedis
 
 from telebot.types import Update
 
-from model import Test, Unit
+from model import Test, Unit, Draft
 
 bot = telebot.TeleBot('306447523:AAG4NEunw0OezXDbDjtTZMEFmRnLwYO5Yn8')
 
@@ -29,8 +29,7 @@ def start(message):
 def new_test(message):
     try:
         token = token_urlsafe(8)
-        redis.set(token, pickle.dumps(Test(token)))
-        temp['token'] = token
+        temp['key'] = Draft(token, Test(token), None)
 
         bot.send_message(message.chat.id, f'Your token: {token}')
         msg = bot.send_message(message.chat.id, 'Set the questions count:')
@@ -41,7 +40,7 @@ def new_test(message):
 
 def set_units_num(message):
     try:
-        temp['num'] = int(message.text)
+        temp['key'].num = int(message.text)
         msg = bot.send_message(message.chat.id, 'Set the question text:')
         bot.register_next_step_handler(msg, set_unit_text)
     except Exception as e:
@@ -50,36 +49,29 @@ def set_units_num(message):
 
 def set_unit_text(message):
     try:
-        token = temp['token']
-        test = pickle.loads(redis.get(token))
-        unit = Unit()
-        unit.text = message.text
-        test.units.append(unit)
-        redis.set(token, pickle.dumps(test))
+        test = temp['key'].test
+        test.units.append(Unit(message.text, None))
 
         msg = bot.send_message(message.chat.id, 'Set the question answer:')
         bot.register_next_step_handler(msg, set_units_answer)
-
     except Exception as e:
         bot.reply_to(message, str(e))
 
 
 def set_units_answer(message):
     try:
-        token = temp['token']
-        num = temp['num']
-
-        test = pickle.loads(redis.get(token))
+        draft = temp['key']
+        test = draft.test
+        num = draft.num
         test.units[-1].answer = message.text
-        redis.set(token, pickle.dumps(test))
 
         if num > 1:
             msg = bot.send_message(message.chat.id, 'Set the question text:')
-            temp['num'] = num - 1
+            temp['key'] = num - 1
             bot.register_next_step_handler(msg, set_unit_text)
         else:
-            del temp['num']
-            del temp['token']
+            del temp['key']
+            redis.set(draft.token, pickle.dump(test))
 
     except Exception as e:
         bot.reply_to(message, str(e))
