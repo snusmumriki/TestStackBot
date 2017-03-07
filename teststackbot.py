@@ -41,7 +41,7 @@ def set_units_num(message):
         bot.register_next_step_handler(msg, set_unit_text)
 
     except Exception as e:
-        bot.reply_to(message, 'oooops')
+        bot.reply_to(message, 'oooops' + str(e))
 
 
 def set_unit_text(message):
