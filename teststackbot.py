@@ -91,6 +91,7 @@ def get_message():
 
 @app.route("/")
 def webhook():
+    redis.flushdb()
     bot.remove_webhook()
     bot.set_webhook(url="https://teststackbot.herokuapp.com/update")
     return '!', 200
