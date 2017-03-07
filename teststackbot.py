@@ -41,7 +41,7 @@ def set_units_num(message):
         bot.register_next_step_handler(msg, set_unit_text)
 
     except Exception as e:
-        bot.reply_to(message, 'oooops' + str(e))
+        bot.reply_to(message, str(e))
 
 
 def set_unit_text(message):
@@ -57,7 +57,7 @@ def set_unit_text(message):
         bot.register_next_step_handler(msg, set_units_answer)
 
     except Exception as e:
-        bot.reply_to(message, 'oooops')
+        bot.reply_to(message, str(e))
 
 
 def set_units_answer(message):
@@ -78,7 +78,7 @@ def set_units_answer(message):
             del temp['token']
 
     except Exception as e:
-        bot.reply_to(message, 'oooops')
+        bot.reply_to(message, str(e))
 
 
 @bot.message_handler(commands=['test'])
@@ -97,12 +97,6 @@ def webhook():
     bot.remove_webhook()
     bot.set_webhook(url="https://teststackbot.herokuapp.com/update")
     return '!', 200
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
