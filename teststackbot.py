@@ -27,12 +27,15 @@ def start(message):
 
 @bot.message_handler(commands=['new'])
 def new_test(message):
-    token = token_urlsafe(8)
-    redis.set(token, dumps(Test(token)))
-    temp['token'] = token
+    try:
+        token = token_urlsafe(8)
+        redis.set(token, dumps(Test(token)))
+        temp['token'] = token
 
-    msg = bot.send_message(message.chat.id, 'Set the questions count:')
-    bot.register_next_step_handler(msg, set_units_num)
+        msg = bot.send_message(message.chat.id, 'Set the questions count:')
+        bot.register_next_step_handler(msg, set_units_num)
+    except Exception as e:
+        bot.reply_to(message, str(e))
 
 
 def set_units_num(message):
