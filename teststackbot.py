@@ -1,9 +1,9 @@
+import pickle
 from secrets import token_urlsafe
 
 import telebot
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
-from flask.json import dumps, loads
 
 from telebot.types import Update
 
@@ -29,9 +29,10 @@ def start(message):
 def new_test(message):
     try:
         token = token_urlsafe(8)
-        redis.set(token, dumps(Test(token)))
+        redis.set(token, pickle.dumps(Test(token)))
         temp['token'] = token
 
+        bot.send_message(message.chat.id, f'Your token: {token}')
         msg = bot.send_message(message.chat.id, 'Set the questions count:')
         bot.register_next_step_handler(msg, set_units_num)
     except Exception as e:
@@ -50,11 +51,11 @@ def set_units_num(message):
 def set_unit_text(message):
     try:
         token = temp['token']
-        test = loads(redis.get(token))
+        test = pickle.loads(redis.get(token))
         unit = Unit()
         unit.text = message.text
         test.units.append(unit)
-        redis.set(token, dumps(test))
+        redis.set(token, pickle.dumps(test))
 
         msg = bot.send_message(message.chat.id, 'Set the question answer:')
         bot.register_next_step_handler(msg, set_units_answer)
@@ -68,9 +69,9 @@ def set_units_answer(message):
         token = temp['token']
         num = temp['num']
 
-        test = loads(redis.get(token))
+        test = pickle.loads(redis.get(token))
         test.units[-1].answer = message.text
-        redis.set(token, dumps(test))
+        redis.set(token, pickle.dumps(test))
 
         if num > 1:
             msg = bot.send_message(message.chat.id, 'Set the question text:')
