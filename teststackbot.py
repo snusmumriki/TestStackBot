@@ -1,21 +1,18 @@
-from secrets import token_bytes
+from secrets import token_urlsafe
 
 import telebot
-import os
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
+from telebot.types import Update
 
 from model import Test, Unit
 
 bot = telebot.TeleBot('306447523:AAG4NEunw0OezXDbDjtTZMEFmRnLwYO5Yn8')
 
 app = Flask(__name__)
-app.config[
-    'REDIS_URL'] = 'redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com:7559'
+app.config['REDIS_URL'] = 'redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634@ec2-34-251-82' \
+                          '-220.eu-west-1.compute.amazonaws.com:7559'
 redis = FlaskRedis(app)
-
-test = None
-b = False
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -26,23 +23,42 @@ def start(message):
 
 
 @bot.message_handler(commands=['new'])
-def start(message):
-    b = True
-    token = token_bytes(16)
-    test = Test(token, [])
+def new_test(message):
+    token = token_urlsafe(16)
+    redis.set(token, Test(token, []))
+    msg = bot.send_message(message.chat.id, 'Set the questions count:')
+    msg.token = token
+    bot.register_next_step_handler(msg, set_units_num)
+
+
+def set_units_num(message):
+    msg = bot.send_message(message.chat.id, 'Set the question text:')
+    msg.token = message.token
+    msg.num = int(message.text)
+    bot.register_next_step_handler(msg, set_unit_text)
+
+
+def set_unit_text(message):
+    test = redis.get(message.token)
     unit = Unit()
-    while b:
-        bot.send_message(message.chat.id, 'Set the question text:')
-        unit.text = yield
-        bot.send_message(message.chat.id, 'Set the question type:')
-        unit.type = yield
-        bot.send_message(message.chat.id, 'Set the question answer:')
-        test.units.append(unit)
+    unit.text = message.text
+    test.units.append(unit)
+    redis.set(message.token, test)
+
+    msg = bot.send_message(message.chat.id, 'Set the question answer:')
+    msg.token = message.token
+    msg.num = message.num
+    bot.register_next_step_handler(msg, set_units_answer)
 
 
-@bot.message_handler(commands=['create'])
-def start(message):
-    b = False
+def set_units_answer(message):
+    test = redis.get(message.token)
+    test.units[-1].answer = message.text
+    redis.set(message.token, test)
+    if message.num > 1:
+        msg = bot.send_message(message.chat.id, 'Set the question text:')
+        msg.num = message.num - 1
+        bot.register_next_step_handler(msg, set_unit_text)
 
 
 @bot.message_handler(commands=['test'])
@@ -57,7 +73,7 @@ def echo_message(message):
 
 @app.route("/update", methods=['POST'])
 def get_message():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    bot.process_new_updates([Update.de_json(request.stream.read().decode("utf-8"))])
     return "!", 200
 
 
