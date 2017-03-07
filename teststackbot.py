@@ -3,6 +3,7 @@ from secrets import token_urlsafe
 import telebot
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
+from flask.json import dumps, loads
 
 from telebot.types import Update
 
@@ -27,7 +28,7 @@ def start(message):
 @bot.message_handler(commands=['new'])
 def new_test(message):
     token = token_urlsafe(8)
-    redis.set(token, Test(token))
+    redis.set(token, dumps(Test(token)))
     temp['token'] = token
 
     msg = bot.send_message(message.chat.id, 'Set the questions count:')
@@ -36,6 +37,7 @@ def new_test(message):
 
 def set_units_num(message):
     try:
+        temp['num'] = int(message.text)
         msg = bot.send_message(message.chat.id, 'Set the question text:')
         bot.register_next_step_handler(msg, set_unit_text)
     except Exception as e:
@@ -45,11 +47,11 @@ def set_units_num(message):
 def set_unit_text(message):
     try:
         token = temp['token']
-        test = redis.get(token)
+        test = loads(redis.get(token))
         unit = Unit()
         unit.text = message.text
-        test.units = [unit]
-        redis.set(token, test)
+        test.units.append(unit)
+        redis.set(token, dumps(test))
 
         msg = bot.send_message(message.chat.id, 'Set the question answer:')
         bot.register_next_step_handler(msg, set_units_answer)
@@ -63,9 +65,9 @@ def set_units_answer(message):
         token = temp['token']
         num = temp['num']
 
-        test = redis.get(token)
+        test = loads(redis.get(token))
         test.units[-1].answer = message.text
-        redis.set(token, test)
+        redis.set(token, dumps(test))
 
         if num > 1:
             msg = bot.send_message(message.chat.id, 'Set the question text:')
