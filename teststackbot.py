@@ -71,7 +71,7 @@ def set_units_answer(message):
             bot.register_next_step_handler(msg, set_unit_text)
         else:
             del temp['key']
-            redis.set(draft.token, pickle.dump(test))
+            redis.set(draft.token, pickle.dumps(test))
             bot.send_message(message.chat.id, 'Test successfully created!')
 
     except Exception as e:
