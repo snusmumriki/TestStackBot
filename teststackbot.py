@@ -76,7 +76,7 @@ def set_units_answer(message):
             bot.send_message(message.chat.id, 'Test successfully created!')
             li = []
             for u in test.units:
-                li.append(u.text+u.answer)
+                li.append(f'{u.text} {u.answer}')
 
             bot.send_message(message.chat.id, str(li))
 
