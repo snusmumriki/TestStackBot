@@ -1,3 +1,4 @@
+import json
 import pickle
 from secrets import token_urlsafe
 
@@ -73,6 +74,7 @@ def set_units_answer(message):
             del temp['key']
             redis.set(draft.token, pickle.dumps(test))
             bot.send_message(message.chat.id, 'Test successfully created!')
+            bot.send_message(message.chat.id, json.dumps(test))
 
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
