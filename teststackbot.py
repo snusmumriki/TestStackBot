@@ -66,8 +66,8 @@ def set_units_answer(message):
         test.units[-1].answer = message.text
 
         if num > 1:
+            temp['key'].num = num - 1
             msg = bot.send_message(message.chat.id, 'Set the question text:')
-            temp['key'] = num - 1
             bot.register_next_step_handler(msg, set_unit_text)
         else:
             del temp['key']
