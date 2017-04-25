@@ -3,6 +3,7 @@ import pickle
 from secrets import token_urlsafe
 
 import telebot
+from django.template.smartif import key
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
 
@@ -88,12 +89,12 @@ def set_units_answer(message):
 def start_test(message):
     try:
         msg = bot.send_message(message.chat.id, 'Enter the token')
-        bot.register_next_step_handler(msg, test_starting)
+        bot.register_next_step_handler(msg, input_token)
     except Exception as e:
         bot.reply_to(message, str(e) + '0')
 
 
-def test_starting(message):
+def input_token(message):
     try:
         temp['key'] = redis[message.text]
         msg = bot.send_message(message.chat.id, 'Set the question text:')
@@ -105,6 +106,7 @@ def test_starting(message):
 def get_task(message):
     try:
         test = temp['key']
+        test.results['key'] = 0
         test.count = len(test.units)
         msg = bot.send_message(message.chat.id, test.units[0].text)
         bot.register_next_step_handler(msg, set_unit_text)
@@ -114,23 +116,18 @@ def get_task(message):
 
 def check_answer(message):
     try:
+        key = message.from_user.username
         test = temp['key']
         units = test.units
+        test.num = len(units)
         answer = units.pop(0).answer
+        test.results['key'] += answer == message.text
         if units:
-            temp['key'].num = num - 1
-            msg = bot.send_message(message.chat.id, 'Set the question text:')
-            bot.register_next_step_handler(msg, set_unit_text)
+            bot.register_next_step_handler(message, set_unit_text)
         else:
             del temp['key']
-            redis.set(draft.token, pickle.dumps(test))
-            bot.send_message(message.chat.id, 'Test successfully created!')
-            li = []
-            for u in test.units:
-                li.append(f'{u.text} {u.answer}')
-
-            bot.send_message(message.chat.id, str(li))
-
+            redis.set('', pickle.dumps(test))
+            bot.send_message(message.chat.id, f'Your result is: {test.results[key]}/{test.num}')
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
