@@ -5,9 +5,11 @@ class Unit:
 
 
 class Test:
+    units = []
+    results = {}
+
     def __init__(self, token):
         self.token = token
-        self.units = []
 
 
 class Draft:
@@ -15,3 +17,10 @@ class Draft:
         self.token = token
         self.test = test
         self.num = num
+
+
+class Process:
+    def __init__(self, test, all, right):
+        self.test = test
+        self.all = all
+        self.right = right
