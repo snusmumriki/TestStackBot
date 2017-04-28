@@ -132,9 +132,23 @@ def check_answer(message):
         bot.reply_to(message, str(e) + '3')
 
 
-@bot.message_handler(commands=['test'])
-def start(message):
-    bot.reply_to(message, 'Hello, ')
+@bot.message_handler(commands=['res'])
+def input_key_res(message):
+    try:
+        msg = bot.send_message(message.chat.id, 'Enter the key')
+        bot.register_next_step_handler(msg, get_result)
+    except Exception as e:
+        bot.reply_to(message, str(e) + '0')
+
+
+@bot.message_handler(commands=['res'])
+def get_result(message):
+    try:
+        key = message.from_user.username
+        test = temp['key']
+        bot.send_message(message.chat.id, f'Your result is: {test.results[key]}/{len(test.units)}')
+    except Exception as e:
+        bot.reply_to(message, str(e) + '0')
 
 
 @app.route("/update", methods=['POST'])
