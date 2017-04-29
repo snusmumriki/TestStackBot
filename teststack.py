@@ -157,8 +157,8 @@ def get_results(message):
     try:
         test = tests['key']
         num = len(test.tasks)
-        results = test.results.items()
-        bot.send_message(message.chat.id, 'Results:\n'.join(f'{r[0]}: {r[1]} / {num}\n' for r in results))
+        items = test.results.items()
+        bot.send_message(message.chat.id, 'Results:\n'.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
     except Exception as e:
         bot.reply_to(message, str(e) + '0')
 
