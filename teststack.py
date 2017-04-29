@@ -1,15 +1,13 @@
-import json
 import pickle
 from secrets import token_urlsafe
 
 import telebot
-from django.template.smartif import key
 from flask import Flask, request
 from flask.ext.redis import FlaskRedis
 
 from telebot.types import Update
 
-from model import Test, Task, Draft
+from model import Test, Task
 
 bot = telebot.TeleBot('345467048:AAEFochiYcGcP7TD5JqYwco8E56cOYCydrk')
 
@@ -22,10 +20,11 @@ tests = {}
 
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
-    text = '/new - create new test' \
-           '/pass - pass the test' \
-           '/mres - my result of the test' \
-           '/res - all results of the test'
+    text = '/new - create new test\n' \
+           '/pass - pass the test\n' \
+           '/mres - my result of the test\n' \
+           '/res - all results of the test\n' \
+           '/del - delete the test\n'
     bot.send_message(message.chat.id, text)
 
 
@@ -92,10 +91,14 @@ def begin(message):
 
 def get_test(message):
     try:
-        tests['key'] = redis[message.text]
-        num = len(tests['key'].tasks)
-        msg = bot.send_message(message.chat.id, f'Let\'s start the test, number of tasks: {num}')
-        bot.register_next_step_handler(msg, set_unit_text)
+        test = redis[message.text]
+        test.key = message.text
+        test.num = len(test.tasks)
+        test.results[message.from_user.username] = 0
+        bot.send_message(message.chat.id, f'Let\'s start the test, number of tasks: {test.num}')
+
+        msg = bot.send_message(message.chat.id, test.tasks[0].text)
+        bot.register_next_step_handler(msg, get_task)
     except Exception as e:
         bot.reply_to(message, str(e) + '1')
 
@@ -103,28 +106,19 @@ def get_test(message):
 def get_task(message):
     try:
         test = tests['key']
-        test.results['key'] = 0
-        msg = bot.send_message(message.chat.id, 'Enter your answer')
-        msg = bot.send_message(message.chat.id, test.tasks[0].text)
-        bot.register_next_step_handler(msg, set_unit_text)
-    except Exception as e:
-        bot.reply_to(message, str(e) + '1')
-
-
-def check_answer(message):
-    try:
-        key = message.from_user.username
-        test = tests['key']
         tasks = test.tasks
-        test.num = len(tasks)
         answer = tasks.pop(0).answer
-        test.results['key'] += answer == message.text
+        name = message.from_user.username
+        test.results[name] += answer == message.text
         if tasks:
-            bot.register_next_step_handler(message, set_unit_text)
+            msg = bot.send_message(message.chat.id, test.tasks[0].text)
+            bot.register_next_step_handler(msg, get_task)
         else:
             del tests['key']
-            redis.set('', pickle.dumps(test))
-            bot.send_message(message.chat.id, f'Your result is: {test.results[key]}/{test.num}')
+            key = test.key
+            del test.key
+            redis[key] = pickle.dumps(test)
+            bot.send_message(message.chat.id, f'Your result is: {test.results[name]}/{test.num}')
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
