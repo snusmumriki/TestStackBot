@@ -117,7 +117,7 @@ def get_task(message):
             del tests['key']
             key = test.key
             del test.key
-            redis[key] = pickle.dumps(test)
+            redis[key] = test.__dict__
             bot.send_message(message.chat.id, f'Your result is: {test.results[name]}/{test.num}')
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
