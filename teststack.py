@@ -76,11 +76,7 @@ def set_task_answer(message):
             del tests['key']
             redis[test.key] = pickle.dumps(test)
             bot.send_message(message.chat.id, 'Test successfully created!')
-            li = []
-            for u in test.tasks:
-                li.append(f'{u.text} {u.answer}')
-
-            bot.send_message(message.chat.id, str(li))
+            bot.send_message(message.chat.id, str([f'{u.text} {u.answer}' for u in test.tasks]))
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
