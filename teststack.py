@@ -73,9 +73,9 @@ def set_task_answer(message):
             bot.register_next_step_handler(msg, set_task_text)
         else:
             del tests['key']
-            redis[test.key] = pickle.dumps(test)
+            redis[test.key] = test.__dict__
             bot.send_message(message.chat.id, 'Test successfully created!')
-            bot.send_message(message.chat.id, str([f'{u.text} {u.answer}' for u in test.tasks]))
+            bot.send_message(message.chat.id, test.__dict__)
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
@@ -135,7 +135,8 @@ def get_result_hint(message):
 @bot.message_handler(commands=['res'])
 def get_result(message):
     try:
-        test = pickle.loads(redis[message.text])
+        test = Test()
+        test.__dict__.update(**redis[message.text])
         result = test.results[message.from_user.username]
         num = len(test.tasks)
         bot.send_message(message.chat.id, f'Your result is: {result} / {num}')
@@ -155,7 +156,8 @@ def get_list_results_hint(message):
 @bot.message_handler(commands=['res'])
 def get_list_results(message):
     try:
-        test = pickle.loads(redis[message.text])
+        test = Test()
+        test.__dict__.update(**redis[message.text])
         num = len(test.tasks)
         items = test.results.items()
         bot.send_message(message.chat.id, 'Results:\n'.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
