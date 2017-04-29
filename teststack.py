@@ -81,7 +81,7 @@ def set_task_answer(message):
 
 
 @bot.message_handler(commands=['pass'])
-def begin(message):
+def get_test_hint(message):
     try:
         msg = bot.send_message(message.chat.id, 'Enter the key')
         bot.register_next_step_handler(msg, get_test)
@@ -124,7 +124,7 @@ def get_task(message):
 
 
 @bot.message_handler(commands=['res'])
-def input_key_result(message):
+def get_result_hint(message):
     try:
         msg = bot.send_message(message.chat.id, 'Enter the key')
         bot.register_next_step_handler(msg, get_result)
@@ -144,7 +144,7 @@ def get_result(message):
 
 
 @bot.message_handler(commands=['res'])
-def input_key_results(message):
+def get_results_hint(message):
     try:
         msg = bot.send_message(message.chat.id, 'Enter the key:')
         bot.register_next_step_handler(msg, get_result)
