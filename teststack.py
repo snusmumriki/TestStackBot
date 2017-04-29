@@ -72,10 +72,13 @@ def set_task_answer(message):
             msg = bot.send_message(message.chat.id, 'Enter number of tasks')
             bot.register_next_step_handler(msg, set_task_text)
         else:
+            key = test.key
+            redis[key] = test.__dict__
+            del test.key
+            del test.num
             del tests['key']
-            redis[test.key] = test.__dict__
             bot.send_message(message.chat.id, 'Test successfully created!')
-            bot.send_message(message.chat.id, test.__dict__)
+            bot.send_message(message.chat.id, str(test.__dict__))
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
@@ -114,10 +117,11 @@ def get_task(message):
             msg = bot.send_message(message.chat.id, test.tasks[0].text)
             bot.register_next_step_handler(msg, get_task)
         else:
-            del tests['key']
             key = test.key
-            del test.key
             redis[key] = test.__dict__
+            del test.key
+            del test.num
+            del tests['key']
             bot.send_message(message.chat.id, f'Your result is: {test.results[name]}/{test.num}')
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
