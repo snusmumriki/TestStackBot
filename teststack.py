@@ -145,7 +145,7 @@ def get_result(message):
         num = len(test.tasks)
         bot.send_message(message.chat.id, f'Your result is: {result} / {num}')
     except Exception as e:
-        bot.reply_to(message, str(e) + '0')
+        bot.reply_to(message, str(e) + '1')
 
 
 @bot.message_handler(commands=['res'])
@@ -162,9 +162,9 @@ def get_list_results(message):
         test = pickle.loads(redis[message.text])
         num = len(test.tasks)
         items = test.results.items()
-        bot.send_message(message.chat.id, 'Results:\n'.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
+        bot.send_message(message.chat.id, 'Results:'.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
     except Exception as e:
-        bot.reply_to(message, str(e) + '0')
+        bot.reply_to(message, str(e) + '1')
 
 
 @app.route('/update', methods=['POST'])
