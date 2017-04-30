@@ -11,10 +11,10 @@ from model import Test, Task
 bot = telebot.TeleBot('345467048:AAEFochiYcGcP7TD5JqYwco8E56cOYCydrk')
 
 app = Flask(__name__)
-#redis = Redis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
-redis = Redis(host='h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
+redis = Redis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
                    '@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com',
               port='7559')
+Redis()
 tests = {}
 
 
@@ -73,10 +73,10 @@ def set_task_answer(message):
             bot.register_next_step_handler(msg, set_task_text)
         else:
             key = test.key
-            redis[key] = test.__dict__
             del test.key
             del test.num
             del tests['key']
+            redis[key] = test.__dict__
             bot.send_message(message.chat.id, 'Test successfully created!')
             bot.send_message(message.chat.id, str(test.__dict__))
     except Exception as e:
