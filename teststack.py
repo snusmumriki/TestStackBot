@@ -77,7 +77,7 @@ def set_task_answer(message):
             del tests['key']
             redis[key] = pickle.dumps(test)
             bot.send_message(message.chat.id, 'Test successfully created!')
-            bot.send_message(message.chat.id, pickle.dumps(test))
+            bot.send_message(message.chat.id, str(pickle.dumps(test)))
     except Exception as e:
         bot.reply_to(message, str(e) + '    3')
 
@@ -102,7 +102,7 @@ def get_test(message):
         msg = bot.send_message(message.chat.id, test.tasks[0].text)
         bot.register_next_step_handler(msg, get_task)
     except Exception as e:
-        bot.reply_to(message, message.text + str(e) + '1')
+        bot.reply_to(message, message.text + str(e) + ' 1')
 
 
 def get_task(message):
