@@ -1,8 +1,10 @@
 class Task:
-    text = None
-    answer = None
+    def __init__(self) -> None:
+        self.text = None
+        self.answer = None
 
 
 class Test:
-    tasks = []
-    results = {}
+    def __init__(self) -> None:
+        self.tasks = []
+        self.results = {}
