@@ -93,7 +93,7 @@ def get_test_hint(message):
 def get_test(message):
     try:
         test = Test()
-        test.__dict__.update(**redis.hgetall(message.text))
+        test.__dict__.update(**redis.hgetall(str(message.text)))
         test.key = message.text
         test.num = len(test.tasks)
         test.results[message.from_user.username] = 0
