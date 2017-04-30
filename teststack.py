@@ -15,7 +15,7 @@ app = Flask(__name__)
 '''redis = StrictRedis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
                          '@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com',
                     port='7559')'''
-redis = StrictRedis(os.environ['REDIS_URL'])
+redis = StrictRedis(os.environ['REDIS_URL'].encode('idna'))
 tests = {}
 
 
