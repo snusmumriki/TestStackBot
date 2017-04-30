@@ -96,6 +96,7 @@ def get_test(message):
         test = pickle.loads(redis[message.text])
         test.key = message.text
         test.num = len(test.tasks)
+        test.ctasks = test.tasks.copy()
         tests['key'] = test
         test.results[message.from_user.username] = 0
         bot.send_message(message.chat.id, f'Let\'s start the test, number of tasks: {test.num}')
@@ -109,19 +110,21 @@ def get_test(message):
 def get_task(message):
     try:
         test = tests['key']
-        tasks = test.tasks
+        tasks = test.ctasks
         answer = tasks.pop(0).answer
         name = message.from_user.username
         test.results[name] += answer == message.text
         if tasks:
-            msg = bot.send_message(message.chat.id, test.tasks[0].text)
+            msg = bot.send_message(message.chat.id, tasks[0].text)
             bot.register_next_step_handler(msg, get_task)
         else:
             bot.send_message(message.chat.id, f'Your result is: {test.results[name]} / {test.num}')
             key = test.key
             del test.key
             del test.num
+            del test.ctasks
             del tests['key']
+            redis[key] = pickle.dumps(test)
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
