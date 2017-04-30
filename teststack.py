@@ -13,7 +13,7 @@ bot = telebot.TeleBot('345467048:AAEFochiYcGcP7TD5JqYwco8E56cOYCydrk')
 app = Flask(__name__)
 redis = Redis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
                    '@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com',
-              port=':7559')
+              port='7559')
 tests = {}
 
 
@@ -169,17 +169,17 @@ def get_list_results(message):
         bot.reply_to(message, str(e) + '0')
 
 
-@app.route("/update", methods=['POST'])
+@app.route('/update', methods=['POST'])
 def get_message():
-    bot.process_new_updates([Update.de_json(request.stream.read().decode("utf-8"))])
+    bot.process_new_updates([Update.de_json(request.stream.read().decode('utf-8'))])
     return '', 200
 
 
-@app.route("/")
+@app.route('/')
 def webhook():
     redis.flushdb()
     bot.remove_webhook()
-    bot.set_webhook(url="https://teststackbot.herokuapp.com/update")
+    bot.set_webhook(url='https://teststackbot.herokuapp.com/update')
     return '', 200
 
 
