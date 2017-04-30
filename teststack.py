@@ -122,7 +122,6 @@ def get_task(message):
             del test.key
             del test.num
             del tests['key']
-            redis[key] = pickle.dumps(test)
     except Exception as e:
         bot.reply_to(message, str(e) + '3')
 
