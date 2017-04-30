@@ -11,7 +11,8 @@ from model import Test, Task
 bot = telebot.TeleBot('345467048:AAEFochiYcGcP7TD5JqYwco8E56cOYCydrk')
 
 app = Flask(__name__)
-redis = Redis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
+#redis = Redis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
+redis = Redis(host='h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
                    '@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com',
               port='7559')
 tests = {}
