@@ -117,7 +117,7 @@ def get_task(message):
             msg = bot.send_message(message.chat.id, test.tasks[0].text)
             bot.register_next_step_handler(msg, get_task)
         else:
-            bot.send_message(message.chat.id, f'Your result is: {test.results[name]}/{test.num}')
+            bot.send_message(message.chat.id, f'Your result is: {test.results[name]} / {test.num}')
             key = test.key
             del test.key
             del test.num
