@@ -75,7 +75,8 @@ def set_task_answer(message):
             del test.key
             del test.num
             del tests['key']
-            redis[key] = test.__dict__
+            #redis[key] = test.__dict__
+            redis[key] = 'test'
             bot.send_message(message.chat.id, 'Test successfully created!')
             bot.send_message(message.chat.id, str(test.__dict__))
     except Exception as e:
