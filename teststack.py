@@ -132,7 +132,7 @@ def get_task(message):
 @bot.message_handler(commands=['mres'])
 def get_result_hint(message):
     try:
-        msg = bot.send_message(message.chat.id, 'Enter test the key')
+        msg = bot.send_message(message.chat.id, 'Enter the test key')
         bot.register_next_step_handler(msg, get_result)
     except Exception as e:
         bot.reply_to(message, str(e) + '0')
@@ -151,7 +151,7 @@ def get_result(message):
 @bot.message_handler(commands=['res'])
 def get_list_results_hint(message):
     try:
-        msg = bot.send_message(message.chat.id, 'Enter the test key:')
+        msg = bot.send_message(message.chat.id, 'Enter the test key')
         bot.register_next_step_handler(msg, get_list_results)
     except Exception as e:
         bot.reply_to(message, str(e) + '0')
