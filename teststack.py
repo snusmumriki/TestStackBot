@@ -162,7 +162,10 @@ def get_list_results(message):
         test = pickle.loads(redis[message.text])
         num = len(test.tasks)
         items = test.results.items()
-        bot.send_message(message.chat.id, 'Results:'.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
+        if num:
+            bot.send_message(message.chat.id, 'Results:\n' + ''.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
+        else:
+            bot.send_message(message.chat.id, 'No results')
     except Exception as e:
         bot.reply_to(message, str(e) + '1')
 
