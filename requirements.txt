@@ -12,3 +12,4 @@ telebot==0.0.3
 telegram==0.0.1
 virtualenv==15.1.0
 Werkzeug==0.11.15
+hiredis==0.2.0
