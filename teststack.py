@@ -12,10 +12,6 @@ from model import Test, Task
 bot = telebot.TeleBot('345467048:AAEFochiYcGcP7TD5JqYwco8E56cOYCydrk')
 
 app = Flask(__name__)
-'''redis = StrictRedis(host='redis://h:p0c08b0fb92a7de45ea5db298baf96d2f7bd48981912d73a19ec96ae3b2eb4634' \
-                         '@ec2-34-251-82-220.eu-west-1.compute.amazonaws.com',
-                    port='7559')'''
-#redis = StrictRedis(os.environ['REDIS_URL'].encode('idna'))
 redis = from_url(os.environ['REDIS_URL'])
 tests = {}
 
@@ -78,8 +74,7 @@ def set_task_answer(message):
             del test.key
             del test.num
             del tests['key']
-            #redis[key] = test.__dict__
-            redis[key] = 'test'
+            redis.hmset(key, test.__dict__)
             bot.send_message(message.chat.id, 'Test successfully created!')
             bot.send_message(message.chat.id, str(test.__dict__))
     except Exception as e:
@@ -98,7 +93,7 @@ def get_test_hint(message):
 def get_test(message):
     try:
         test = Test()
-        test.__dict__.update(**redis[message.text])
+        test.__dict__.update(**redis.hgetall(message.text))
         test.key = message.text
         test.num = len(test.tasks)
         test.results[message.from_user.username] = 0
@@ -144,7 +139,7 @@ def get_result_hint(message):
 def get_result(message):
     try:
         test = Test()
-        test.__dict__.update(**redis[message.text])
+        test.__dict__.update(**redis.hgetall(message.text))
         result = test.results[message.from_user.username]
         num = len(test.tasks)
         bot.send_message(message.chat.id, f'Your result is: {result} / {num}')
@@ -165,7 +160,7 @@ def get_list_results_hint(message):
 def get_list_results(message):
     try:
         test = Test()
-        test.__dict__.update(**redis[message.text])
+        test.__dict__.update(**redis.hgetall(message.text))
         num = len(test.tasks)
         items = test.results.items()
         bot.send_message(message.chat.id, 'Results:\n'.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
