@@ -127,7 +127,7 @@ def get_task(message):
         bot.reply_to(message, str(e) + '3')
 
 
-@bot.message_handler(commands=['res'])
+@bot.message_handler(commands=['mres'])
 def get_result_hint(message):
     try:
         msg = bot.send_message(message.chat.id, 'Enter test the key')
@@ -136,7 +136,6 @@ def get_result_hint(message):
         bot.reply_to(message, str(e) + '0')
 
 
-@bot.message_handler(commands=['res'])
 def get_result(message):
     try:
         test = pickle.loads(redis[message.text])
@@ -156,7 +155,6 @@ def get_list_results_hint(message):
         bot.reply_to(message, str(e) + '0')
 
 
-@bot.message_handler(commands=['res'])
 def get_list_results(message):
     try:
         test = pickle.loads(redis[message.text])
