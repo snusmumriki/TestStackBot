@@ -6,12 +6,21 @@ import telebot
 from flask import Flask, request
 from redis import from_url
 
-from telebot.types import Update
+from telebot.types import Update, ReplyKeyboardMarkup, KeyboardButton
 
-from model import Test, Task
+
+class Task:
+    is_text = None
+    text = None
+    correct = None
+
+
+class Test:
+    tasks = []
+    results = {}
+
 
 bot = telebot.TeleBot('345467048:AAEFochiYcGcP7TD5JqYwco8E56cOYCydrk')
-
 app = Flask(__name__)
 redis = from_url(os.environ['REDIS_URL'])
 tests = {}
@@ -32,43 +41,43 @@ def new_test(message):
     try:
         test = Test()
         test.key = token_urlsafe(8)
+        test.num = int(list(message.text.split())[-1])
         tests['key'] = test
-
         bot.send_message(message.chat.id, f'Your key: {test.key}')
-        msg = bot.send_message(message.chat.id, 'Enter number of tasks')
-        bot.register_next_step_handler(msg, set_tasks_num)
-    except Exception as e:
-        bot.reply_to(message, str(e) + '0')
-
-
-def set_tasks_num(message):
-    try:
-        tests['key'].num = int(message.text)
         msg = bot.send_message(message.chat.id, 'Enter the task text')
         bot.register_next_step_handler(msg, set_task_text)
     except Exception as e:
-        bot.reply_to(message, str(e) + '1')
+        bot.reply_to(message, str(e) + ' 0')
 
 
 def set_task_text(message):
     try:
         task = Task()
-        task.text = message.text
+        task.is_text = message.content_type == 'photo'
+        if task.is_text:
+            task.text = message.text
+        else:
+            task.text = message.photo
         tests['key'].tasks.append(task)
         msg = bot.send_message(message.chat.id, 'Enter the task correct answer')
-        bot.register_next_step_handler(msg, set_task_answer)
+        bot.register_next_step_handler(msg, set_task_correct_answer)
+        '''markup = ReplyKeyboardMarkup(one_time_keyboard=True, row_width=4)
+        markup.row(KeyboardButton(a) for a in answer)'''
     except Exception as e:
-        bot.reply_to(message, str(e) + '2')
+        bot.reply_to(message, str(e) + ' 2')
 
 
-def set_task_answer(message):
+def set_task_correct_answer(message):
     try:
         test = tests['key']
-        test.tasks[-1].answer = message.text
+        answer = message.text
+        if answer[0] == ':':
+            answer = set(list(answer.split())[1:])
+        test.tasks[-1].correct = answer
 
         if test.num > 1:
             test.num -= 1
-            msg = bot.send_message(message.chat.id, 'Enter number of tasks')
+            msg = bot.send_message(message.chat.id, 'Enter the task text')
             bot.register_next_step_handler(msg, set_task_text)
         else:
             key = test.key
@@ -79,21 +88,14 @@ def set_task_answer(message):
             bot.send_message(message.chat.id, 'Test successfully created!')
             bot.send_message(message.chat.id, str(pickle.dumps(test)))
     except Exception as e:
-        bot.reply_to(message, str(e) + '    3')
+        bot.reply_to(message, str(e) + ' 3')
 
 
 @bot.message_handler(commands=['pass'])
-def get_test_hint(message):
-    try:
-        msg = bot.send_message(message.chat.id, 'Enter the key')
-        bot.register_next_step_handler(msg, get_test)
-    except Exception as e:
-        bot.reply_to(message, str(e) + '0')
-
-
 def get_test(message):
     try:
-        test = pickle.loads(redis[message.text])
+        key = list(message.text.split())[-1]
+        test = pickle.loads(redis[key])
         test.key = message.text
         test.num = len(test.tasks)
         test.ctasks = test.tasks.copy()
@@ -101,7 +103,12 @@ def get_test(message):
         test.results[message.from_user.username] = 0
         bot.send_message(message.chat.id, f'Let\'s start the test, number of tasks: {test.num}')
 
-        msg = bot.send_message(message.chat.id, test.tasks[0].text)
+        msg = None
+        task = test.tasks[0]
+        if task.is_text:
+            msg = bot.send_message(message.chat.id, task.text)
+        else:
+            msg = bot.send_photo(message.chat.id, task.text)
         bot.register_next_step_handler(msg, get_task)
     except Exception as e:
         bot.reply_to(message, str(e) + ' 1')
@@ -111,9 +118,13 @@ def get_task(message):
     try:
         test = tests['key']
         tasks = test.ctasks
-        answer = tasks.pop(0).answer
         name = message.from_user.username
-        test.results[name] += answer == message.text
+        correct = tasks.pop(0).correct
+        if correct is set:
+            answer = set(message.text.split())
+        else:
+            answer = message.text
+        test.results[name] += answer == correct
         if tasks:
             msg = bot.send_message(message.chat.id, tasks[0].text)
             bot.register_next_step_handler(msg, get_task)
@@ -130,17 +141,9 @@ def get_task(message):
 
 
 @bot.message_handler(commands=['mres'])
-def get_result_hint(message):
-    try:
-        msg = bot.send_message(message.chat.id, 'Enter the test key')
-        bot.register_next_step_handler(msg, get_result)
-    except Exception as e:
-        bot.reply_to(message, str(e) + '0')
-
-
 def get_result(message):
     try:
-        test = pickle.loads(redis[message.text])
+        test = pickle.loads(redis[list(message.text.split())[-1]])
         result = test.results[message.from_user.username]
         num = len(test.tasks)
         bot.send_message(message.chat.id, f'Your result is: {result} / {num}')
@@ -149,23 +152,23 @@ def get_result(message):
 
 
 @bot.message_handler(commands=['res'])
-def get_list_results_hint(message):
-    try:
-        msg = bot.send_message(message.chat.id, 'Enter the test key')
-        bot.register_next_step_handler(msg, get_list_results)
-    except Exception as e:
-        bot.reply_to(message, str(e) + '0')
-
-
 def get_list_results(message):
     try:
-        test = pickle.loads(redis[message.text])
+        test = pickle.loads(redis[list(message.text.split())[-1]])
         num = len(test.tasks)
         items = test.results.items()
         if num:
             bot.send_message(message.chat.id, 'Results:\n' + ''.join(f'{i[0]}: {i[1]} / {num}\n' for i in items))
         else:
             bot.send_message(message.chat.id, 'No results')
+    except Exception as e:
+        bot.reply_to(message, str(e) + '1')
+
+
+@bot.message_handler(commands=['del'])
+def delete_test(message):
+    try:
+        bot.send_message(message.chat.id, 'Test successfully deleted!')
     except Exception as e:
         bot.reply_to(message, str(e) + '1')
 
@@ -177,7 +180,7 @@ def get_message():
 
 
 @app.route('/')
-def webhook():
+def index():
     redis.flushdb()
     bot.remove_webhook()
     bot.set_webhook(url='https://teststackbot.herokuapp.com/update')
