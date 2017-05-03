@@ -10,7 +10,7 @@ from telebot.types import Update, ReplyKeyboardMarkup, KeyboardButton
 
 
 class Task:
-    is_text = True
+    is_text = None
     text = None
     correct = None
 
@@ -54,7 +54,6 @@ def set_task_text(message):
     try:
         task = Task()
         task.text = message.text
-        bot.send_message(message.chat.id, str(message.content_type))
         task.is_text = message.content_type == 'text'
         if task.is_text:
             task.text = message.text
