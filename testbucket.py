@@ -10,7 +10,7 @@ from telebot.types import Update, ReplyKeyboardMarkup, KeyboardButton
 
 
 class Task:
-    is_text = None
+    is_text = True
     text = None
     correct = None
 
