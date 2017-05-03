@@ -177,7 +177,7 @@ def delete_test(message):
 
 
 @app.route('/update', methods=['POST'])
-def get_message():
+def update():
     bot.process_new_updates([Update.de_json(request.stream.read().decode('utf-8'))])
     return '', 200
 
