@@ -106,7 +106,6 @@ def get_test(message):
         test.results[message.from_user.username] = 0
         bot.send_message(message.chat.id, f'Let\'s start the test, number of tasks: {test.num}')
 
-        msg = None
         task = test.tasks[0]
         if task.is_text:
             msg = bot.send_message(message.chat.id, task.text)

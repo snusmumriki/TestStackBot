@@ -1,1 +1,1 @@
-web: gunicorn teststack:app
+web: gunicorn testbucket:app
