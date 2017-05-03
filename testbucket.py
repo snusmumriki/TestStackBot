@@ -58,6 +58,7 @@ def set_task_text(message):
         '''task.is_text = message.content_type == 'photo'
         if task.is_text:
             task.text = message.text
+            
         else:
             task.text = message.photo'''
         tests['key'].tasks.append(task)
