@@ -41,7 +41,7 @@ def new_test(message):
     try:
         test = Test()
         test.key = token_urlsafe(8)
-        test.num = int(list(message.text.split())[-1])
+        test.num = int(message.text.split()[-1])
         tests['key'] = test
         bot.send_message(message.chat.id, f'Your key: {test.key}')
         msg = bot.send_message(message.chat.id, 'Enter the task text')
@@ -53,11 +53,13 @@ def new_test(message):
 def set_task_text(message):
     try:
         task = Task()
-        task.is_text = message.content_type == 'photo'
+        task.text = message.text
+        bot.send_message(message.chat.id, str(message.content_type))
+        '''task.is_text = message.content_type == 'photo'
         if task.is_text:
             task.text = message.text
         else:
-            task.text = message.photo
+            task.text = message.photo'''
         tests['key'].tasks.append(task)
         msg = bot.send_message(message.chat.id, 'Enter the task correct answer')
         bot.register_next_step_handler(msg, set_task_correct_answer)
@@ -72,7 +74,7 @@ def set_task_correct_answer(message):
         test = tests['key']
         answer = message.text
         if answer[0] == ':':
-            answer = set(list(answer.split())[1:])
+            answer = set(answer.split()[1:])
         test.tasks[-1].correct = answer
 
         if test.num > 1:
@@ -94,7 +96,7 @@ def set_task_correct_answer(message):
 @bot.message_handler(commands=['pass'])
 def get_test(message):
     try:
-        key = list(message.text.split())[-1]
+        key = message.text.split()[-1]
         test = pickle.loads(redis[key])
         test.key = message.text
         test.num = len(test.tasks)
@@ -143,7 +145,7 @@ def get_task(message):
 @bot.message_handler(commands=['mres'])
 def get_result(message):
     try:
-        test = pickle.loads(redis[list(message.text.split())[-1]])
+        test = pickle.loads(redis[message.text.split()[-1]])
         result = test.results[message.from_user.username]
         num = len(test.tasks)
         bot.send_message(message.chat.id, f'Your result is: {result} / {num}')
@@ -154,7 +156,7 @@ def get_result(message):
 @bot.message_handler(commands=['res'])
 def get_list_results(message):
     try:
-        test = pickle.loads(redis[list(message.text.split())[-1]])
+        test = pickle.loads(redis[message.text.split()[-1]])
         num = len(test.tasks)
         items = test.results.items()
         if num:
