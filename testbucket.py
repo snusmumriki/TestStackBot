@@ -59,7 +59,7 @@ def set_task_text(message):
         if task.is_text:
             task.text = message.text
         else:
-            task.text = message.photo.file_id
+            task.text = message.photo[-1].file_id
         tests['key'].tasks.append(task)
         msg = bot.send_message(message.chat.id, 'Enter the task correct answer')
         bot.register_next_step_handler(msg, set_task_correct_answer)
