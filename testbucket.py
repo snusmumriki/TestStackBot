@@ -109,6 +109,7 @@ def get_test(message):
         else:
             msg = bot.send_photo(message.chat.id, task.text)
         bot.register_next_step_handler(msg, get_task)
+
     except Exception as e:
         bot.reply_to(message, str(e) + ' 1')
 
