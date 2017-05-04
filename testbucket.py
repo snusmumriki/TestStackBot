@@ -86,7 +86,7 @@ def set_task_correct(message):
             del tests['key']
             redis[key] = pickle.dumps(test)
             bot.send_message(message.chat.id, 'Test successfully created!')
-            bot.send_message(message.chat.id, str(pickle.dumps(test)))
+            bot.send_message(message.chat.id, str(len(test.tasks)))
     except Exception as e:
         bot.reply_to(message, str(e) + ' 3')
 
