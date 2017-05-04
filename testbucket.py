@@ -53,7 +53,6 @@ def new_test(message):
 def set_task_text(message):
     try:
         task = Task()
-        task.text = message.text
         task.is_text = message.content_type == 'text'
         if task.is_text:
             task.text = message.text
@@ -61,14 +60,14 @@ def set_task_text(message):
             task.text = message.photo[-1].file_id
         tests['key'].tasks.append(task)
         msg = bot.send_message(message.chat.id, 'Enter the task correct answer')
-        bot.register_next_step_handler(msg, set_task_correct_answer)
+        bot.register_next_step_handler(msg, set_task_correct)
         '''markup = ReplyKeyboardMarkup(one_time_keyboard=True, row_width=4)
         markup.row(KeyboardButton(a) for a in answer)'''
     except Exception as e:
         bot.reply_to(message, str(e) + ' 2')
 
 
-def set_task_correct_answer(message):
+def set_task_correct(message):
     try:
         test = tests['key']
         answer = message.text
@@ -97,7 +96,7 @@ def get_test(message):
     try:
         key = message.text.split()[-1]
         test = pickle.loads(redis[key])
-        test.key = message.text
+        test.key = key
         test.num = len(test.tasks)
         test.ctasks = test.tasks.copy()
         tests['key'] = test
@@ -126,7 +125,11 @@ def get_task(message):
             answer = message.text
         test.results[name] += answer == correct
         if tasks:
-            msg = bot.send_message(message.chat.id, tasks[0].text)
+            task = test.tasks[0]
+            if task.is_text:
+                msg = bot.send_message(message.chat.id, task.text)
+            else:
+                msg = bot.send_photo(message.chat.id, task.text)
             bot.register_next_step_handler(msg, get_task)
         else:
             bot.send_message(message.chat.id, f'Your result is: {test.results[name]} / {test.num}')
