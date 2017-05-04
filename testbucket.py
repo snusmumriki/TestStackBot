@@ -46,6 +46,7 @@ def new_test(message):
         bot.send_message(message.chat.id, f'Your key: {test.key}')
         msg = bot.send_message(message.chat.id, 'Enter the task text')
         bot.register_next_step_handler(msg, set_task_text)
+
     except Exception as e:
         bot.reply_to(message, str(e) + ' 0')
 
